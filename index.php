@@ -75,6 +75,13 @@ switch ( $action )
     case 'set':
         // echo "<p>IS URL: $lnk</p>\n"; 
         // make sure value does not exist
+        if ( empty($lnk) )
+        {
+            $errmsg = 'ERROR: Not a true link.' . "\n";
+            echo $errmsg;
+            error_log($errmsg);
+            exit;
+        }
         $found_key = FALSE;
         if ( !empty($links) )
             $found_key = array_search($lnk, $links); 
@@ -82,6 +89,7 @@ switch ( $action )
         if ( FALSE != $found_key )
         {
             $realpath = get_short_url($found_key);
+            header("Access-Control-Allow-Origin: *");
             echo "$realpath";
         } else {
             // echo "NOT FOUND KEY";
@@ -96,16 +104,17 @@ switch ( $action )
             $status = write_php_ini( $links, $linksfile);
             $shorturl = get_short_url($ourcode);
             if ( $status )
+            {
+                header("Access-Control-Allow-Origin: *");
                 echo "$shorturl";
-            else {
+            } else {
                 $errmsg = "ERROR: Could not save your short url.\n";
                 echo $errmsg;
                 error_log($errmsg);
             }
         }
-            
-        // if not, then save it
         exit;
+        break;
     case 'get':
     default:
         if ( isset($links[$action]))
@@ -119,14 +128,4 @@ echo 'Unknown link.';
 exit;
 
 
-exit;
-
-
-if(isset($_GET['l']) && array_key_exists($_GET['l'], $links)){
-        header('Location: ' . $links[$_GET['l']]);
-}
-else{
-        header('HTTP/1.0 404 Not Found');
-            echo 'Unknown link.';
-}
 ?>
