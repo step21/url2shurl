@@ -36,14 +36,15 @@ if ( isset($_REQUEST['_id']) &&
 $links = parse_ini_file($linksfile);
 if ( FALSE == $links )
     error_log("Could not parse the ini file: $linksfile");
-
-// echo "<pre>";
-// echo '$_REQUEST' . "\n";
-// var_dump($links);
-// var_dump($_REQUEST);
-// echo '$_SERVER' . "\n";
-// var_dump($_SERVER);
-// echo "</pre>";
+/*
+echo "<pre>";
+echo '$_REQUEST' . "\n";
+var_dump($links);
+var_dump($_REQUEST);
+echo '$_SERVER' . "\n";
+var_dump($_SERVER);
+echo "</pre>";
+*/
 
 if ( $_REQUEST['a'] );
 {
@@ -56,8 +57,14 @@ if ( $_REQUEST['a'] );
 
 
 $lnk = '';
-if ( isset($_REQUEST['l']) && is_url( $_REQUEST['l'] ) )
+// @TODO removed is_url check for now
+if ( isset($_REQUEST['l']) && is_url_real($_REQUEST['l']) )
+{
     $lnk = $_REQUEST['l'];
+}
+
+// check if the url really exists
+
 
 /* 
  FOR LATER, add way to add vanity url like http://something.com/u2s/agreement/43c2e23cv
@@ -77,8 +84,9 @@ switch ( $action )
         // make sure value does not exist
         if ( empty($lnk) )
         {
-            $errmsg = 'ERROR: Not a true link.' . "\n";
-            echo $errmsg;
+            // header('HTTP/1.0 404 Not Found');
+            // $errmsg = 'ERROR: Not a true link.' . "\n";
+            // echo $errmsg;
             error_log($errmsg);
             exit;
         }
@@ -108,8 +116,8 @@ switch ( $action )
                 header("Access-Control-Allow-Origin: *");
                 echo "$shorturl";
             } else {
-                $errmsg = "ERROR: Could not save your short url.\n";
-                echo $errmsg;
+                // $errmsg = "ERROR: Could not save your short url.\n";
+                // echo $errmsg;
                 error_log($errmsg);
             }
         }
