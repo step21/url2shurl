@@ -58,7 +58,8 @@ if ( $_REQUEST['a'] );
 
 $lnk = '';
 // @TODO removed is_url check for now
-if ( isset($_REQUEST['l']) && is_url_real($_REQUEST['l']) )
+// @TODO add back is_url_real which is working, but not really when disconnected
+if ( isset($_REQUEST['l']) /* && is_url_real($_REQUEST['l']) */ )
 {
     $lnk = $_REQUEST['l'];
 }
@@ -85,7 +86,7 @@ switch ( $action )
         if ( empty($lnk) )
         {
             // header('HTTP/1.0 404 Not Found');
-            // $errmsg = 'ERROR: Not a true link.' . "\n";
+            $errmsg = 'ERROR: Not a true link.' . "\n";
             // echo $errmsg;
             error_log($errmsg);
             exit;
@@ -96,7 +97,7 @@ switch ( $action )
         // var_dump($found_key);
         if ( FALSE != $found_key )
         {
-            $realpath = get_short_url($found_key);
+            $realpath = get_short_url_path($found_key);
             header("Access-Control-Allow-Origin: *");
             echo "$realpath";
         } else {
@@ -110,13 +111,13 @@ switch ( $action )
 
             $links[$ourcode] = $lnk;
             $status = write_php_ini( $links, $linksfile);
-            $shorturl = get_short_url($ourcode);
+            $shorturl = get_short_url_path($ourcode);
             if ( $status )
             {
                 header("Access-Control-Allow-Origin: *");
                 echo "$shorturl";
             } else {
-                // $errmsg = "ERROR: Could not save your short url.\n";
+                $errmsg = "ERROR: Could not save your short url.\n";
                 // echo $errmsg;
                 error_log($errmsg);
             }
