@@ -13,6 +13,9 @@ $linksfile = 'db/links.ini';
 $action    = 'get';
 $links     = false;
 
+$redirects_on = true;
+// $redirects_on = false;
+
 // base 35 is easier to type
 $ourchars = '123456789abcdefghijklmnopqrstuvwxyz';
 
@@ -36,15 +39,10 @@ if ( isset($_REQUEST['_id']) &&
 $links = parse_ini_file($linksfile);
 if ( FALSE == $links )
     error_log("Could not parse the ini file: $linksfile");
-/*
-echo "<pre>";
-echo '$_REQUEST' . "\n";
-var_dump($links);
-var_dump($_REQUEST);
-echo '$_SERVER' . "\n";
-var_dump($_SERVER);
-echo "</pre>";
-*/
+
+// dumper($links);
+// dumper($_REQUEST);
+// dumper($_SERVER);
 
 if ( $_REQUEST['a'] );
 {
@@ -85,29 +83,27 @@ switch ( $action )
         // make sure value does not exist
         if ( empty($lnk) )
         {
-            // header('HTTP/1.0 404 Not Found');
+            header('HTTP/1.0 404 Not Found');
             $errmsg = 'ERROR: Not a true link.' . "\n";
-            // echo $errmsg;
             error_log($errmsg);
             exit;
         }
         $found_key = FALSE;
         if ( !empty($links) )
             $found_key = array_search($lnk, $links); 
-        // var_dump($found_key);
+
         if ( FALSE != $found_key )
         {
             $realpath = get_short_url_path($found_key);
             header("Access-Control-Allow-Origin: *");
             echo "$realpath";
         } else {
-            // echo "NOT FOUND KEY";
-            // var_dump($found_key);
-
             $counter = get_counter($ctfile);
             $now = time();
             $oursalt = $counter . $now; 
             $ourcode = base_encode($oursalt, 35, $ourchars);
+
+            // dumper($lnk);
 
             $links[$ourcode] = $lnk;
             $status = write_php_ini( $links, $linksfile);
@@ -118,7 +114,6 @@ switch ( $action )
                 echo "$shorturl";
             } else {
                 $errmsg = "ERROR: Could not save your short url.\n";
-                // echo $errmsg;
                 error_log($errmsg);
             }
         }
@@ -128,7 +123,30 @@ switch ( $action )
     default:
         if ( isset($links[$action]))
         {
-            header('Location: ' . $links[$action]);
+            $full_link = '';
+            // if you have query string on top of a shortened url
+            // then let's just append that to the found string, useful
+            // if you need to nest these shorturls
+            if ( count($_REQUEST) > 1 )
+            {
+                $more_args = $_REQUEST;
+                unset($more_args['a']);
+                // dumper($more_args);
+                $tmp_query_string = http_build_query( $more_args );     
+                $pos = strpos( $links[$action], '?' );
+                $len = strlen( $links[$action] );
+                if ( false === $pos )
+                    $full_link = $links[$action] . '?' . $tmp_query_string;
+                else
+                    $full_link = $links[$action] . '&' . $tmp_query_string;
+            } else {
+                $full_link = $links[$action];
+            }
+
+            if ( $redirects_on )
+                header('Location: ' . $full_link);
+            else
+                echo 'Redirects Off: ' . $full_link;
             exit;
         }
 }
