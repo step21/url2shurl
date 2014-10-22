@@ -1,24 +1,13 @@
 # ONLY FOR APACHE
 
 RewriteEngine On
+Options +FollowSymlinks
+RewriteBase /u2s/
 
-# RewriteCond $1 !^(index\.php)
-# RewriteRule ^(.*)$ index.php?l=$1 [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/?$ index.php?a=$1 [L,QSA]
 
-# This will stop processing if it's images
-# RewriteRule \.(css|jpe?g|gif|png|js)$ - [L] 
-
-
-# Redirect everything to apache
-# If the requested filename isn’t a file….
-#RewriteCond %{REQUEST_FILENAME} !-f
-# and it isn’t a folder…
-#RewriteCond %{REQUEST_FILENAME} !-d
-
-RewriteRule ^(.*)$ index.php?$1 [L,QSA] 
-
-# L = (last - stop processing rules)
-# QSA = (append query string from requeste to substring URL)
 
 #
 # FOR NGINX, if in subdirectory url2shurl, remove url2shurl below if in root dir
