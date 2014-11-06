@@ -40,10 +40,6 @@ $links = parse_ini_file($linksfile);
 if ( FALSE == $links )
     error_log("Could not parse the ini file: $linksfile");
 
-// dumper($links);
-// dumper($_REQUEST);
-// dumper($_SERVER);
-
 if ( $_REQUEST['a'] );
 {
     if ( '/' == substr( $_REQUEST['a'],-1 ) )
@@ -103,8 +99,6 @@ switch ( $action )
             $oursalt = $counter . $now; 
             $ourcode = base_encode($oursalt, 35, $ourchars);
 
-            // dumper($lnk);
-
             $links[$ourcode] = $lnk;
             $status = write_php_ini( $links, $linksfile);
             $shorturl = get_short_url_path($ourcode);
@@ -131,16 +125,25 @@ switch ( $action )
             {
                 $more_args = $_REQUEST;
                 unset($more_args['a']);
-                // dumper($more_args);
                 $tmp_query_string = http_build_query( $more_args );     
                 $pos = strpos( $links[$action], '?' );
                 $len = strlen( $links[$action] );
+
                 if ( false === $pos )
                     $full_link = $links[$action] . '?' . $tmp_query_string;
                 else
                     $full_link = $links[$action] . '&' . $tmp_query_string;
             } else {
                 $full_link = $links[$action];
+
+            }
+
+            $do_processurl = strpos( $full_link, '@processurl' );
+            if ( FALSE !== $do_processurl )
+            {
+                $entry_link = get_short_url_path( $action );
+                $full_link  = $full_link . "&_processurl=" . 
+                    urlencode($entry_link); 
             }
 
             if ( $redirects_on )
